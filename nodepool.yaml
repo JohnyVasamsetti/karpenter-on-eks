@@ -1,0 +1,31 @@
+apiVersion: karpenter.sh/v1beta1
+kind: NodePool
+metadata:
+  name: karpenter-nodepool
+spec:
+  template:
+    metadata:
+      labels:
+        node_pool: karpenter
+    spec:
+      requirements:
+        - key: karpenter.k8s.aws/instance-family
+          operator: In
+          values: [ "c5", "m5", "r5" ]
+        - key: karpenter.k8s.aws/instance-size
+          operator: In
+          values: [ "2xlarge", "4xlarge", "6xlarge", "8xlarge" ]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand","spot"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+      nodeClassRef:
+        name: karpenter-ec2-nodeclass
+  limits:
+    cpu: "100"
+    memory: 200Gi
+  disruption:
+    consolidationPolicy: WhenUnderutilized
+    expireAfter: 168h
